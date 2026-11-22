@@ -1,0 +1,3 @@
+plugins { id 'com.android.application' }
+android { namespace 'com.scrollshot.lite'; compileSdk 35
+ defaultConfig { applicationId 'com.scrollshot.lite'; minSdk 30; targetSdk 35; versionCode 1; versionName '1.0.0' } }
