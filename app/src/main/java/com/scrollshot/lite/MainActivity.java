@@ -1,0 +1,11 @@
+package com.scrollshot.lite;
+import android.app.*;import android.os.*;import android.content.*;import android.provider.Settings;import android.widget.*;
+public class MainActivity extends Activity {
+ public void onCreate(Bundle b){super.onCreate(b); LinearLayout l=new LinearLayout(this);l.setOrientation(1);l.setPadding(45,55,45,30);
+ TextView title=new TextView(this);title.setText("스크롤샷\n\n다른 앱에서 화면을 캡처하고 자동으로 스크롤합니다.");title.setTextSize(21);l.addView(title);
+ TextView help=new TextView(this);help.setText("1. 접근성 설정에서 스크롤샷 활성화\n2. 캡처할 앱으로 이동\n3. 플로팅 ▶ 버튼을 눌러 시작\n\n캡처는 사진/ScrollShotLite 폴더에 저장됩니다.");l.addView(help);
+ TextView count=new TextView(this);count.setText("캡처 횟수 (2~100)");l.addView(count);SeekBar bar=new SeekBar(this);bar.setMax(98);l.addView(bar);TextView n=new TextView(this);l.addView(n);bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int p,boolean u){n.setText((p+2)+"장");getPreferences(0).edit().putInt("count",p+2).apply();}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});bar.setProgress(getPreferences(0).getInt("count",10)-2);
+ TextView delay=new TextView(this);delay.setText("스크롤 후 대기 (0.4~2.0초)");l.addView(delay);SeekBar speed=new SeekBar(this);speed.setMax(16);l.addView(speed);TextView s=new TextView(this);l.addView(s);speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int p,boolean u){int ms=400+p*100;s.setText(ms+"ms");getPreferences(0).edit().putInt("delay",ms).apply();}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});speed.setProgress((getPreferences(0).getInt("delay",700)-400)/100);
+ Button settings=new Button(this);settings.setText("접근성 권한 설정");settings.setOnClickListener(v->startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)));l.addView(settings);
+ Button show=new Button(this);show.setText("플로팅 버튼 표시");show.setOnClickListener(v->{if(CaptureService.instance!=null)CaptureService.instance.showOverlay();else Toast.makeText(this,"접근성 권한을 먼저 켜세요",Toast.LENGTH_LONG).show();});l.addView(show);setContentView(l); }
+}
