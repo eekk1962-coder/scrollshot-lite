@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
     add(root,text("댓글은 자동 게시되지 않습니다. 선택한 문구를 복사한 뒤 Instagram에서 직접 확인하고 게시하세요.",12,GRAY),5);
     Intent incoming=getIntent();if(Intent.ACTION_SEND.equals(incoming.getAction()) && incoming.getType()!=null && incoming.getType().startsWith("image/")){Uri u=incoming.getParcelableExtra(Intent.EXTRA_STREAM);if(u!=null)load(u);}
   }
-  Button button(String name,int color){Button b=new Button(this);b.setText(name);b.setTextAllCaps(false);b.setTextSize(15);b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));b.setTextColor(-1);b.setMinHeight(dp(52));return b;}
+  Button button(String name,int color){Button b=new Button(this);b.setText(name);b.setTextSize(15);b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));b.setTextColor(-1);b.setMinHeight(dp(52));return b;}
   @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(req==PICK && result==RESULT_OK && data!=null)load(data.getData());}
   void load(Uri u){selected=u;try{preview.setImageURI(u);status.setText("캡처를 선택했어요. 댓글 후보를 생성할 수 있습니다.");}catch(Exception e){status.setText("이미지를 열지 못했어요.");}}
   void generate(){if(selected==null){status.setText("릴스 캡처를 먼저 선택해 주세요.");return;}String url=endpoint.getText().toString().trim();if(!url.startsWith("https://")){showLocal();return;}status.setText("화면을 분석하고 있어요…");new Thread(()->remote(url,token.getText().toString().trim())).start();}
