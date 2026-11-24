@@ -16,10 +16,16 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Regression test recorded screen labels
+        working-directory: mealcare-macro
+        run: |
+          mkdir -p /tmp/mealcare-test
+          javac -encoding UTF-8 -d /tmp/mealcare-test app/src/main/java/kr/signal/mealcaremacro/PickupParser.java tests/PickupParserTest.java
+          java -cp /tmp/mealcare-test kr.signal.mealcaremacro.PickupParserTest
       - run: gradle --no-daemon :app:assembleDebug
         working-directory: mealcare-macro
       - uses: actions/upload-artifact@v4
         with:
-          name: mealcare-macro-v1.0.4-apk
+          name: mealcare-macro-v1.0.5-apk
           path: mealcare-macro/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
