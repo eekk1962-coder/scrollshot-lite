@@ -8,6 +8,8 @@ final class PickupParser {
  static final Pattern QTY=Pattern.compile("수량[:：]?([0-9]+)(?=픽업|$|[+])");
  static String normalize(String s){return s==null?"":s.replaceAll("[\\s\\u00a0\\u200b\\u3000]+","").replace('–','-').replace('−','-').replace('（','(').replace('）',')');}
  static LocalDate resolve(int month,int day,LocalDate today){try{LocalDate d=LocalDate.of(today.getYear(),month,day);if(d.isBefore(today.minusMonths(6)))d=d.plusYears(1);if(d.isAfter(today.plusMonths(6)))d=d.minusYears(1);return d;}catch(Exception e){return null;}}
+ static boolean weekend(LocalDate d){return d.getDayOfWeek()==DayOfWeek.SATURDAY||d.getDayOfWeek()==DayOfWeek.SUNDAY;}
+ static LocalDate nextEligible(LocalDate d,java.util.Set<String> seen){while(weekend(d)||seen.contains(d.toString()))d=d.plusDays(1);return d;}
  static final class Card {final LocalDate date;final boolean closed;Card(LocalDate d,boolean c){date=d;closed=c;}}
  static Card card(String text,LocalDate today){Matcher m=CARD.matcher(normalize(text));if(!m.matches())return null;LocalDate d=resolve(Integer.parseInt(m.group(2)),Integer.parseInt(m.group(3)),today);return d==null?null:new Card(d,m.group(1)!=null);}
  static LocalDate detail(String text,LocalDate today){Matcher m=DETAIL.matcher(normalize(text));if(!m.find())return null;try{return m.group(1)==null?resolve(Integer.parseInt(m.group(2)),Integer.parseInt(m.group(3)),today):LocalDate.of(Integer.parseInt(m.group(1)),Integer.parseInt(m.group(2)),Integer.parseInt(m.group(3)));}catch(Exception e){return null;}}

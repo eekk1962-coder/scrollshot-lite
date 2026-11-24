@@ -15,6 +15,12 @@ public class PickupParserTest {
  check(Integer.valueOf(10).equals(PickupParser.quantity(detail.replace("수량 1","수량 10"))),"reject qty 10");
  check(PickupParser.quantity("상품 설명 1")==null,"unknown qty");
  check(LocalDate.of(2027,1,1).equals(PickupParser.card("헬시팩(사내식당-석식용) 01.01(금) 픽업",LocalDate.of(2026,12,30)).date),"year rollover");
+ java.util.Set<String> done=new java.util.HashSet<>();
+ LocalDate cursor=PickupParser.nextEligible(start,done);
+ for(String day:new String[]{"2026-11-27","2026-11-30","2026-12-01","2026-12-02"}){check(cursor.toString().equals(day),"weekday sequence "+day+" got "+cursor);done.add(day);cursor=PickupParser.nextEligible(cursor.plusDays(1),done);}
+ check(PickupParser.nextEligible(start,done).equals(LocalDate.of(2026,12,3)),"restart skips booked");
+ check(PickupParser.nextEligible(LocalDate.of(2026,11,28),java.util.Collections.emptySet()).equals(LocalDate.of(2026,11,30)),"weekend start");
+ System.out.println("PASS: weekday target sequence, restart, weekend start");
  System.out.println("PASS: actual log labels, date filtering, CLOSED, other products, combined detail, quantity and rollover");
  }
 }

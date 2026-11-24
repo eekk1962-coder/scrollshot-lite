@@ -7,7 +7,7 @@ public class MainActivity extends Activity {
  Button button(String s,Runnable r){Button b=new Button(this);b.setAllCaps(false);b.setText(s);b.setOnClickListener(v->r.run());return b;}
  @Override public void onCreate(Bundle b){super.onCreate(b);try{date=LocalDate.parse(getPreferences(0).getString("date",date.toString()));}catch(Exception ignored){}
  ScrollView sc=new ScrollView(this);LinearLayout l=new LinearLayout(this);l.setOrientation(1);l.setPadding(dp(24),dp(26),dp(24),dp(24));sc.addView(l);setContentView(sc);
- l.addView(text("헬시팩 예약",28));l.addView(text("v1.0.5",12));l.addView(text("석식 · 헬시팩 · 날짜별 1개",15));l.addView(text("시작 날짜 (포함)",14));
+ l.addView(text("헬시팩 예약",28));l.addView(text("v1.0.6",12));l.addView(text("석식 · 헬시팩 · 평일 날짜별 1개",15));l.addView(text("시작 날짜 (포함)",14));
  dateView=text(date.toString(),22);l.addView(dateView);l.addView(button("날짜 선택",()->new DatePickerDialog(this,(v,y,m,d)->{date=LocalDate.of(y,m+1,d);dateView.setText(date.toString());getPreferences(0).edit().putString("date",date.toString()).apply();},date.getYear(),date.getMonthValue()-1,date.getDayOfMonth()).show()));
  preview=new CheckBox(this);preview.setText("예약하지 않고 탐색만 하기");l.addView(preview);
  l.addView(button("접근성 권한 설정",()->startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))));
