@@ -11,7 +11,8 @@ final class PickupParser {
  static boolean weekend(LocalDate d){return d.getDayOfWeek()==DayOfWeek.SATURDAY||d.getDayOfWeek()==DayOfWeek.SUNDAY;}
  static LocalDate nextEligible(LocalDate d,java.util.Set<String> seen){while(weekend(d)||seen.contains(d.toString()))d=d.plusDays(1);return d;}
  static final class Card {final LocalDate date;final boolean closed;Card(LocalDate d,boolean c){date=d;closed=c;}}
- static Card card(String text,LocalDate today){Matcher m=CARD.matcher(normalize(text));if(!m.matches())return null;LocalDate d=resolve(Integer.parseInt(m.group(2)),Integer.parseInt(m.group(3)),today);return d==null?null:new Card(d,m.group(1)!=null);}
+ static Card card(String text,LocalDate today){return card(text,today,MealSelection.defaults());}
+ static Card card(String text,LocalDate today,MealSelection selection){Matcher m=Pattern.compile("^(CLOSED)?"+selection.productPattern+"(\\d{1,2})[./-](\\d{1,2})(?:\\([월화수목금토일]\\))?픽업$",Pattern.CASE_INSENSITIVE).matcher(normalize(text));if(!m.matches())return null;LocalDate d=resolve(Integer.parseInt(m.group(2)),Integer.parseInt(m.group(3)),today);return d==null?null:new Card(d,m.group(1)!=null);}
  static LocalDate detail(String text,LocalDate today){Matcher m=DETAIL.matcher(normalize(text));if(!m.find())return null;try{return m.group(1)==null?resolve(Integer.parseInt(m.group(2)),Integer.parseInt(m.group(3)),today):LocalDate.of(Integer.parseInt(m.group(1)),Integer.parseInt(m.group(2)),Integer.parseInt(m.group(3)));}catch(Exception e){return null;}}
  static Integer quantity(String text){Matcher m=QTY.matcher(normalize(text));if(!m.find())return null;try{return Integer.valueOf(m.group(1));}catch(Exception e){return null;}}
 }

@@ -20,12 +20,12 @@ jobs:
         working-directory: mealcare-macro
         run: |
           mkdir -p /tmp/mealcare-test
-          javac -encoding UTF-8 -d /tmp/mealcare-test app/src/main/java/kr/signal/mealcaremacro/PickupParser.java tests/PickupParserTest.java
+          javac -encoding UTF-8 -d /tmp/mealcare-test app/src/main/java/kr/signal/mealcaremacro/PickupParser.java app/src/main/java/kr/signal/mealcaremacro/MealSelection.java tests/PickupParserTest.java
           java -cp /tmp/mealcare-test kr.signal.mealcaremacro.PickupParserTest
       - run: gradle --no-daemon :app:assembleDebug
         working-directory: mealcare-macro
       - uses: actions/upload-artifact@v4
         with:
-          name: mealcare-macro-v1.0.6-apk
+          name: mealcare-macro-v1.1.0-apk
           path: mealcare-macro/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
