@@ -21,19 +21,24 @@ public class PickupParserTest {
  check(PickupParser.nextEligible(start,done).equals(LocalDate.of(2026,12,3)),"restart skips booked");
  check(PickupParser.nextEligible(LocalDate.of(2026,11,28),java.util.Collections.emptySet()).equals(LocalDate.of(2026,11,30)),"weekend start");
  java.util.Set<String> keys=new java.util.HashSet<>();
- for(boolean lunch:new boolean[]{true,false})for(String menu:MealSelection.MENUS){
-  MealSelection sel=new MealSelection(lunch,menu);check(keys.add(sel.key),"separate history key");
-  String suffix=lunch?"(R&D센터)":menu.equals("투고서비스")?"(사내식당-석식)":"(사내식당-석식용)";
+ for(String location:new String[]{MealSelection.RD,MealSelection.PRODUCTION,MealSelection.DINNER})for(String menu:MealSelection.MENUS){
+  MealSelection sel=new MealSelection(location,menu);boolean lunch=sel.lunch;check(keys.add(sel.key),"separate history key");
+  String suffix=lunch?"("+location+")":menu.equals("투고서비스")?"(사내식당-석식)":"(사내식당-석식용)";
   String label=menu+suffix+" 11.27(금) 픽업";
   PickupParser.Card c=PickupParser.card(label,today,sel);check(c!=null&&c.date.equals(start)&&!c.closed,"selected "+label);
   check(PickupParser.card("CLOSED "+label,today,sel).closed,"closed "+label);
   check(sel.product(menu+suffix+" 수량 1 픽업날짜 2026.11.27(금)"),"detail match "+label);
-  check(PickupParser.card(label,today,new MealSelection(!lunch,menu))==null,"reject other meal "+label);
-  for(String other:MealSelection.MENUS)if(!other.equals(menu))check(PickupParser.card(label,today,new MealSelection(lunch,other))==null,"reject other menu "+label);
+  for(String otherLocation:new String[]{MealSelection.RD,MealSelection.PRODUCTION,MealSelection.DINNER})if(!otherLocation.equals(location)){MealSelection other=new MealSelection(otherLocation,menu);check(PickupParser.card(label,today,other)==null,"reject other location "+label);check(other.otherTabProduct(label),"detect wrong tab "+label);check(!other.product(menu+suffix+" 수량 1"),"reject wrong detail location "+label);}
+  check(!sel.otherTabProduct(label),"accept own tab "+label);check(sel.tab.equals(location),"exact tab name");
+  for(String other:MealSelection.MENUS)if(!other.equals(menu))check(PickupParser.card(label,today,new MealSelection(location,other))==null,"reject other menu "+label);
  }
  check(MealSelection.defaults().key.equals("booked"),"preserve legacy dinner healthy pack bookings");
  check(new MealSelection(false,"도시락세트").product("도시락세트(사내식당-석식)"),"dinner alternative suffix");
- System.out.println("PASS: all eight selections, wrong meal/menu rejection, closed, legacy booking keys");
+ check(keys.size()==12,"all 12 independent records");
+ check(new MealSelection(true,"헬시팩").key.equals("booked_lunch_헬시팩"),"preserve RD history");
+ check(new MealSelection(false,"샐러드세트").key.equals("booked_dinner_샐러드세트"),"preserve dinner history");
+ for(String name:new String[]{"도시락세트","샐러드세트","헬시팩"}){MealSelection sel=new MealSelection(MealSelection.PRODUCTION,name);check(PickupParser.card(name+"(통합생산동) 11.26(목) 픽업",today,sel).date.equals(LocalDate.of(2026,11,26)),"screenshot label "+name);}
+ System.out.println("PASS: all twelve selections, wrong location/menu rejection, screenshot labels, closed, legacy booking keys");
  System.out.println("PASS: weekday target sequence, restart, weekend start");
  System.out.println("PASS: actual log labels, date filtering, CLOSED, other products, combined detail, quantity and rollover");
  }

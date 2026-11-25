@@ -7,8 +7,8 @@ public class MainActivity extends Activity {
  Button button(String s,Runnable r){Button b=new Button(this);b.setAllCaps(false);b.setText(s);b.setOnClickListener(v->r.run());return b;}
  @Override public void onCreate(Bundle b){super.onCreate(b);try{date=LocalDate.parse(getPreferences(0).getString("date",date.toString()));}catch(Exception ignored){}
  ScrollView sc=new ScrollView(this);LinearLayout l=new LinearLayout(this);l.setOrientation(1);l.setPadding(dp(24),dp(26),dp(24),dp(24));sc.addView(l);setContentView(sc);
- l.addView(text("밀케어 자동 예약",28));l.addView(text("v1.1.0 · 평일 날짜별 1개",13));
- l.addView(text("식사 선택",19));meals=new RadioGroup(this);meals.setOrientation(RadioGroup.HORIZONTAL);addOption(meals,"중식 (R&D센터)",101);addOption(meals,"석식 (사내식당)",102);l.addView(meals);meals.check(getPreferences(0).getBoolean("lunch",false)?101:102);
+ l.addView(text("밀케어 자동 예약",28));l.addView(text("v1.2.0 · 평일 날짜별 1개",13));
+ l.addView(text("식사 · 수령 장소 선택",19));meals=new RadioGroup(this);meals.setOrientation(RadioGroup.VERTICAL);addOption(meals,"중식 (R&D센터)",101);addOption(meals,"중식 (통합생산동)",103);addOption(meals,"석식 (사내식당)",102);l.addView(meals);int mealId=getPreferences(0).getInt("mealId",getPreferences(0).getBoolean("lunch",false)?101:102);meals.check(mealId==101||mealId==103?mealId:102);
  l.addView(text("메뉴 선택",19));menus=new RadioGroup(this);menus.setOrientation(RadioGroup.VERTICAL);for(int i=0;i<MealSelection.MENUS.length;i++)addOption(menus,MealSelection.MENUS[i],201+i);l.addView(menus);int menuIndex=getPreferences(0).getInt("menuIndex",3);menus.check(201+Math.max(0,Math.min(3,menuIndex)));
  selectedInfo=text("",14);l.addView(selectedInfo);meals.setOnCheckedChangeListener((group,id)->saveSelection());menus.setOnCheckedChangeListener((group,id)->saveSelection());saveSelection();
  l.addView(text("예약 시작 날짜 (포함)",19));
@@ -21,8 +21,8 @@ public class MainActivity extends Activity {
  l.addView(button("선택한 식사·메뉴 예약 기록 초기화",()->{MealSelection selected=selection();new AlertDialog.Builder(this).setMessage(selected.display+"의 앱 내부 중복 방지 기록만 지웁니다. 실제 예약은 취소되지 않습니다.").setNegativeButton("취소",null).setPositiveButton("초기화",(d,w)->{if(MacroService.instance==null||!MacroService.instance.running)getSharedPreferences("run",0).edit().remove(selected.key).apply();}).show();}));
  }
  void addOption(RadioGroup group,String label,int id){RadioButton rb=new RadioButton(this);rb.setId(id);rb.setText(label);rb.setTextSize(15);rb.setPadding(dp(4),dp(5),dp(8),dp(5));group.addView(rb);}
- MealSelection selection(){int index=Math.max(0,Math.min(3,menus.getCheckedRadioButtonId()-201));return new MealSelection(meals.getCheckedRadioButtonId()==101,MealSelection.MENUS[index]);}
- void saveSelection(){MealSelection s=selection();getPreferences(0).edit().putBoolean("lunch",s.lunch).putInt("menuIndex",menus.getCheckedRadioButtonId()-201).apply();selectedInfo.setText(s.display+" · 날짜별 1개 · 토/일 제외");}
+ MealSelection selection(){int index=Math.max(0,Math.min(3,menus.getCheckedRadioButtonId()-201));int id=meals.getCheckedRadioButtonId();return new MealSelection(id==101?MealSelection.RD:id==103?MealSelection.PRODUCTION:MealSelection.DINNER,MealSelection.MENUS[index]);}
+ void saveSelection(){MealSelection s=selection();getPreferences(0).edit().putBoolean("lunch",s.lunch).putInt("mealId",meals.getCheckedRadioButtonId()).putInt("menuIndex",menus.getCheckedRadioButtonId()-201).apply();selectedInfo.setText(s.display+" · 날짜별 1개 · 토/일 제외");}
  void startMacro(){if(MacroService.instance==null){status.setText("접근성 설정에서 밀케어 예약 자동화를 켜주세요.");return;} if(MacroService.instance.running)return;
  Intent query=new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);ArrayList<ResolveInfo> matches=new ArrayList<>();
  for(ResolveInfo ri:getPackageManager().queryIntentActivities(query,0)){String label=ri.loadLabel(getPackageManager()).toString().replaceAll("\\s+","").toLowerCase(Locale.ROOT);if((label.equals("mealcare")||label.equals("밀케어")||label.equals("밀케어앱"))&&!ri.activityInfo.packageName.equals(getPackageName()))matches.add(ri);}
